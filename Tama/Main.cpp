@@ -1,6 +1,14 @@
 ﻿
 # include <Siv3D.hpp> // OpenSiv3D v0.4.2
 
+class TestCate
+{
+private:
+	int a;
+public:
+	
+};
+
 void Main()
 {
 	// 初期化
