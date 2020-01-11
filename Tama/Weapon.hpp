@@ -4,18 +4,19 @@
 #ifndef WEAPON_HPP
 #define WEAPON_HPP
 
+#include <Siv3D.hpp>
 #include "Bullet.hpp"
 
-// ここに武器の基底クラスを記述する
+
 class WeaponBase
 {
 public:
 	WeaponBase()
 	{
-
+		
 	}
 
-	virtual void update() = 0;
+	virtual void update(Vec2 gum_pos) = 0;
 	virtual void draw() const = 0;
 	virtual Array<Bullet> getBullets() = 0;
 
