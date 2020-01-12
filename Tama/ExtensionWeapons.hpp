@@ -256,6 +256,7 @@ private:
 	int firing_rate;
 	const int explosion_radius = 50; // 爆発の範囲の半径
 	const int explosion_density = 10; // 爆発の密度、爆発の範囲にどれだけ弾(小爆発)を敷き詰めるか
+	const double ammunition_rate = 0.4; // 集弾率 0だとまっすぐ、大きい数だと散らばる
 
 	const Rect bullet_base = Rect(0, 0, 10, 15);
 	const int bullet_visible_frame = 120;
@@ -264,7 +265,7 @@ private:
 	void shot() override
 	{
 		// 発射エフェクトの描画のフラグを立てるならここに書くとよいかもしれない
-		bullet_list.push_back(Bullet(bullet_image, bullet_base.w, bullet_base.h, pos - bullet_base.center(), Vec2(Random<double>(-0.4, 0.4), -10), 0, bullet_visible_frame, U"flieger"));
+		bullet_list.push_back(Bullet(bullet_image, bullet_base.w, bullet_base.h, pos - bullet_base.center(), Vec2(Random<double>(-ammunition_rate, ammunition_rate), -10), 0, bullet_visible_frame, U"flieger"));
 	}
 	
 
