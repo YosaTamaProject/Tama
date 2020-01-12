@@ -1,15 +1,31 @@
 ﻿
 # include <Siv3D.hpp> // OpenSiv3D v0.4.2
 
+//----------------------- 
+// 自作クラス
+#include "Person.hpp"
+#include "User.hpp"
+#include "Enemy.hpp"
+#include "Weapon.hpp"
+#include "ExtensionWeapons.hpp"
+
 void Main()
 {
-	// 初期化
+	//----------------------- 
+	// 初期化 
+	//-----------------------
 
+	
 	while (System::Update())
 	{
-		//	計算処理
+		//----------------------- 
+		// 制御ロジック
+		//-----------------------	
 
+		//-----------------------
 		// 描画処理
+		//-----------------------
+		
 	}
 }
 
