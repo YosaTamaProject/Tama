@@ -264,7 +264,7 @@ private:
 	void shot() override
 	{
 		// 発射エフェクトの描画のフラグを立てるならここに書くとよいかもしれない
-		bullet_list.push_back(Bullet(bullet_image, bullet_base.w, bullet_base.h, pos - bullet_base.center(), Vec2(0, -10), 0, bullet_visible_frame, U"flieger"));
+		bullet_list.push_back(Bullet(bullet_image, bullet_base.w, bullet_base.h, pos - bullet_base.center(), Vec2(Random<double>(-0.4, 0.4), -10), 0, bullet_visible_frame, U"flieger"));
 	}
 	
 
