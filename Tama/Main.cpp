@@ -11,21 +11,72 @@
 
 void Main()
 {
-	//----------------------- 
-	// 初期化 
-	//-----------------------
-
+	// 初期化
+	int game_state = 0;
+	constexpr int user_move_speed = 5;
+	constexpr int user_size = 50; 
+	WeaponBase* user_wp = new PredatorCannon(Scene::Center());
+	User user = User(user_wp, 100, Scene::Center() ,0);
+	Texture user_image = Texture(U"Path");
+	Rect user_collision = Rect(Scene::Center(), user_size);
+	Font title = Font(40);
+	
 	
 	while (System::Update())
 	{
-		//----------------------- 
 		// 制御ロジック
-		//-----------------------	
 
-		//-----------------------
-		// 描画処理
-		//-----------------------
+		// タイトル画面
+		if (game_state == 0)
+		{
+			if (SimpleGUI::ButtonAt(U"ガトリング砲を試す", Scene::Center(), 250))
+			{
+				game_state = 1;
+				user_wp = new PredatorCannon(Scene::Center());
+			}
+			if (SimpleGUI::ButtonAt(U"レールガンを試す", Scene::Center() + Vec2(0, 50), 250))
+			{
+				game_state = 1;
+				user_wp = new PlasmaRailGun(Scene::Center());
+			}
+			if (SimpleGUI::ButtonAt(U"フリーガーハマーを試す", Scene::Center() + Vec2(0, 100), 250))
+			{
+				game_state = 1;
+				user_wp = new Fliegerhummer(Scene::Center());
+			}
+			if (SimpleGUI::ButtonAt(U"アプリを終了する", Scene::Center() + Vec2(0, 150), 250))
+			{
+				System::Exit();
+			}
+			title(U"プロトタイプ１").drawAt(Scene::Center() - Vec2(0, 100));
+			continue; // ゲーム画面の処理をスキップ
+		}
+
+		// ゲーム画面
+
+		// userの移動
+		Vec2 move_pos = user.get_pos();
+		move_pos += Vec2(KeyD.pressed() - KeyA.pressed(), KeyS.pressed() - KeyW.pressed()).setLength(user_move_speed);
+		if (move_pos.intersects(Scene::Rect())) // userをシーンの外に出さない
+		{
+			user.set_pos(move_pos);
+			user_collision.setCenter(user.get_pos().asPoint()); // 当たり判定の移動
+		}
+
+		// enemyの移動
+		// hogehoge();
 		
+		// 武器の移動、発射処理
+		user_wp->update(user.get_pos());
+
+		// 当たり判定の処理
+		// hogehoge();
+
+		
+		// 描画処理
+		user.draw();
+		user_wp->draw();
+		user_image.resized(user_size).drawAt(user.get_pos());
 	}
 }
 
