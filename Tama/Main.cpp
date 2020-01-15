@@ -13,13 +13,16 @@ void Main()
 {
 	// 初期化
 	int game_state = 0;
-	constexpr int user_move_speed = 5;
-	constexpr int user_size = 50; 
+
+	constexpr int user_move_speed = 10;
+	constexpr int user_size = 50;
+	
 	WeaponBase* user_wp = new PredatorCannon(Scene::Center());
 	User user = User(user_wp, 100, Scene::Center() ,0);
-	Texture user_image = Texture(U"Path");
 	Rect user_collision = Rect(Scene::Center(), user_size);
-	Font title = Font(40);
+	const Texture user_image = Texture(U"Path");
+	
+	const Font title = Font(40);
 	
 	
 	while (System::Update())
