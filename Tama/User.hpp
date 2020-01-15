@@ -10,11 +10,11 @@
 class User : public PersonBase
 {
 public:
-	User() : User(nullptr, 0, 0, 0, 0)
+	User() : User(nullptr, 0, Vec2(0, 0), 0)
 	{
 	}
 
-	User(WeaponBase* wp, const int hp, const int x, const int y, const int item): PersonBase(wp, hp, x, y), item_(item)
+	User(WeaponBase* wp, const int hp, const Vec2 pos, const int item): PersonBase(wp, hp, pos), item_(item)
 	{
 	}
 
