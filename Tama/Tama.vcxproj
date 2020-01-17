@@ -234,6 +234,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.hpp" />
+    <ClInclude Include="EnemyAI.hpp" />
+    <ClInclude Include="ExtensionAI.hpp" />
     <ClInclude Include="ExtensionWeapons.hpp" />
     <ClInclude Include="Person.hpp" />
     <ClInclude Include="User.hpp" />
