@@ -11,15 +11,15 @@ class PersonBase
 {
 public:
 	// コンストラクタ
-	PersonBase() : PersonBase(nullptr, 0, 0, 0)
+	PersonBase() : PersonBase(nullptr, 0, Vec2(0, 0))
+	{
+	}
+	
+	PersonBase(const int hp, const Vec2 pos) : PersonBase(nullptr, hp, pos)
 	{
 	}
 
-	PersonBase(const int hp, const int x, const int y) : PersonBase(nullptr, hp, x, y)
-	{
-	}
-
-	PersonBase(WeaponBase* wp, const int hp, const int x, const int y) : wp_(wp), hp_(hp), x_(x), y_(y)
+	PersonBase(WeaponBase* wp, const int hp, const Vec2 pos) : wp_(wp), hp_(hp), pos_(pos)
 	{
 	}
 
@@ -55,29 +55,38 @@ public:
 
 	void set_x(const int x)
 	{
-		this->x_ = x;
+		this->pos_.x = x;
 	}
 
 	int get_x() const
 	{
-		return this->x_;
+		return this->pos_.x;
 	}
 
 	void set_y(const int y)
 	{
-		this->y_ = y;
+		this->pos_.y = y;
 	}
 
 	int get_y() const
 	{
-		return this->y_;
+		return this->pos_.y;
+	}
+
+	void set_pos(const Vec2 pos)
+	{
+		pos_ = pos;
+	}
+
+	Vec2 get_pos() const
+	{
+		return pos_;
 	}
 
 private:
 	WeaponBase* wp_;
 	int hp_;
-	int x_;
-	int y_;
+	Vec2 pos_;
 };
 
 #endif
