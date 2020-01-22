@@ -1,5 +1,24 @@
-﻿
-# include <Siv3D.hpp> // OpenSiv3D v0.4.2
+﻿# include <Siv3D.hpp> // OpenSiv3D v0.4.2
+
+// デバッグ用のマクロ
+#define DEBUG_SCENE_TRANSITION 
+
+/*
+ * やること
+ *
+ *	シーンUIの実装は知らん...
+ *
+ * 1. シーン遷移とゲーム画面の分離 O
+ * 1-2. 描画の分離 O
+ * 2. ゲームステートをうまく使ってシーンを分離 O
+ * 3. シーンごとにswitchブロックを生成(ロジックのみ, 描画は後程って感じで) O
+ * 4. 各ステージのロジックを実装. <- IAの完成待ち
+ * 4-2. 明らかなバグをフィックス
+ * 5. テスト!!
+ *
+ * 描画と上手くいけばいいね. テクスチャなどは今のところいじらない方針でいきます.
+ * 
+ */
 
 //----------------------- 
 // 自作クラス
@@ -14,47 +33,95 @@
 void Main()
 {
 	// 初期化
-	int game_state = 0;
+	constexpr auto scene_title = 0;
+	constexpr auto scene_select = 1;
+	constexpr auto scene_pause = 2;
+	constexpr auto scene_game_over = 3;
+	constexpr auto scene_game_clear = 4;
+	constexpr auto scene_result = 5;
+	constexpr auto scene_stage_1 = 6;
+	constexpr auto scene_stage_1_b = 7;
+	constexpr auto user_move_speed = 10;
+	constexpr auto user_size = 50;
 
-	constexpr int user_move_speed = 10;
-	constexpr int user_size = 50;
-	
+	const auto title = Font(40);
+	const auto user_image = Texture(U"Path");
+
 	WeaponBase* user_wp = new PredatorCannon(Scene::Center());
-	User user = User(user_wp, 100, Scene::Center() ,0);
-	Rect user_collision = Rect(Scene::Center(), user_size);
-	const Texture user_image = Texture(U"Path");
+	auto user = User(user_wp, 100, Scene::Center(), 0);
+	auto user_collision = Rect(Scene::Center(), user_size);
 
-	Vec2 spawn_pos = RandomVec2(Scene::Rect());
+	auto spawn_pos = RandomVec2(Scene::Rect());
 	Array<Enemy> enemies;
 	WeaponBase* temp_wp = new SampleWeapon(spawn_pos, Vec2(0, 5));
 	EnemyAIBase* temp_ai = new EnemyAISample(temp_wp);
 
 	enemies.push_back(Enemy(temp_wp, temp_ai, Texture(U"").resized(200, 200), 1000, spawn_pos));
-	
-	const Font title = Font(40);
-	
-	
+
+	auto game_state = 0;
+	std::stack<int> game_state_carry;
+
 	while (System::Update())
 	{
+		////////////////////////////////////////////////////////////////////////////////////
 		// 制御ロジック
+		////////////////////////////////////////////////////////////////////////////////////
 
-		// タイトル画面
-		if (game_state == 0)
+		// 画面の状態遷移について
+		/*
+		 *   これをgame_stateとswitch文で実装します
+		 *
+		 *	シーンごとにマクロを用意しました. 
+		 *  切り替え時にはこちらを使って下さい.
+		 *
+		 *  SCENE_TITLE,
+		 *	SCENE_SELECT,
+		 *	SCENE_PAUSE,
+		 *	SCENE_GAME_OVER,
+		 *	SCENE_GAME_CLEAR,
+		 *	SCENE_RESULT,
+		 *	SCENE_STAGE_1,
+		 *	SCENE_STAGE_1_B,
+		 *
+		 *   [-----タイトル画面 (case 0)-----]
+		 *   ↓                                 ↑
+		 *   [-----セレクト画面 (case 1)-----] |
+		 *   ↓                                 |
+		 *   [-----第一ステージ (case 6)-----] |
+		 *   |   ↓ ↑			↓ ↑            |
+		 *   | [ポーズ画面] [ゲームオーバ-] -| |  ポーズ画面がcase 2, ゲームオーバーがcase 4です.
+		 *   ↓			                     | |
+		 *   [----第一ステージボス(case 7)]  | |
+		 *   |   ↓ ↑			↓ ↑          | | 
+		 *   | [ポーズ画面] [ゲームオーバ-] -| |
+		 *   ↓                               | |
+		 *   [----クリア画面(case 3)-------] | |
+		 *   ↓                               ↓ |
+		 *   [----リザルト画面(case 5)---------]                       
+		 */
+
+		switch (game_state)
 		{
-			if (SimpleGUI::ButtonAt(U"ガトリング砲を試す", Scene::Center(), 250))
+			// タイトル画面(エンター押して抜けるやつ)
+		case scene_title:
+			if (SimpleGUI::ButtonAt(U"ゲームスタート", Scene::Center() + Vec2(0, 100), 250))
 			{
-				game_state = 1;
+				game_state = scene_select;
+			}
+			title(U"😎たま😎").drawAt(Scene::Center() - Vec2(0, 50));
+			continue;
+
+			// セレクト画面(自機とか選ぶやつ)
+		case scene_select:
+			if (SimpleGUI::ButtonAt(U"ステージ1へ", Scene::Center(), 250))
+			{
+				game_state = scene_stage_1;
 				user_wp = new PredatorCannon(Scene::Center());
 			}
-			if (SimpleGUI::ButtonAt(U"レールガンを試す", Scene::Center() + Vec2(0, 50), 250))
+			if (SimpleGUI::ButtonAt(U"ステージ1ボスへ", Scene::Center() + Vec2(0, 50), 250))
 			{
-				game_state = 1;
+				game_state = scene_stage_1_b;
 				user_wp = new PlasmaRailGun(Scene::Center());
-			}
-			if (SimpleGUI::ButtonAt(U"フリーガーハマーを試す", Scene::Center() + Vec2(0, 100), 250))
-			{
-				game_state = 1;
-				user_wp = new Fliegerhummer(Scene::Center());
 			}
 			if (SimpleGUI::ButtonAt(U"アプリを終了する", Scene::Center() + Vec2(0, 150), 250))
 			{
@@ -62,63 +129,135 @@ void Main()
 			}
 			title(U"プロトタイプ１").drawAt(Scene::Center() - Vec2(0, 100));
 			continue; // ゲーム画面の処理をスキップ
-		}
 
-
-		if (user.get_hp() <= 0)
-		{
-			if (SimpleGUI::ButtonAt(U"アプリを終了する", Scene::Center() + Vec2(0, 100), 250))
+			// ポーズ画面
+		case scene_pause:
+			if (SimpleGUI::ButtonAt(U"ゲームに戻る", Scene::Center() + Vec2(0, 100), 250))
 			{
-				System::Exit();
+				game_state = game_state_carry.top();
+				game_state_carry.pop();
+			}
+			title(U"ポーズ").drawAt(Scene::Center() - Vec2(0, 50));
+			break;
+
+			// クリア画面
+		case scene_game_clear:
+			if (SimpleGUI::ButtonAt(U"結果を確認する", Scene::Center() + Vec2(0, 100), 250))
+			{
+				game_state = scene_result;
+			}
+			title(U"ゲームクリア!!!!").drawAt(Scene::Center() - Vec2(0, 50));
+			continue;
+
+
+			// ゲームオーバー画面
+		case scene_game_over:
+			if (SimpleGUI::ButtonAt(U"結果を確認する", Scene::Center() + Vec2(0, 100), 250))
+			{
+				game_state = scene_result;
 			}
 			title(U"ゲームオーバー").drawAt(Scene::Center() - Vec2(0, 50));
 			continue;
+
+			// リザルト画面
+		case scene_result:
+			if (SimpleGUI::ButtonAt(U"タイトルへ", Scene::Center() + Vec2(0, 100), 250))
+			{
+				game_state = scene_title;
+			}
+			title(U"リザルト").drawAt(Scene::Center() - Vec2(0, 50));
+			continue;
+
+			///////////////////////////////////////////////////////////////////////////////////
+			// 第一ステージのロジック
+			///////////////////////////////////////////////////////////////////////////////////
+			/*
+			タイマーで時間を測って, 1分経てばボスステージに遷移するのように
+			時間で制御するのはどうでしょうか.
+
+			メインループの上で初期化をしておいて, セレクト画面でセレクトされたときにタイマーをリセット.
+			ゲームステージのswitch文ないで時間計測によるif文で制御をかける感じでどうでしょうか
+
+			以下参考文献
+			https://github.com/Siv3D/Reference-JP/wiki/%E7%B5%8C%E9%81%8E%E6%99%82%E9%96%93%E3%81%AE%E6%B8%AC%E5%AE%9A
+
+			*/
+		case scene_stage_1:
+
+			// ポーズがあるか確認する
+			if(KeyEscape.pressed()){
+				game_state_carry.push(game_state);
+				game_state = scene_pause;
+			}
+
+			// userの移動
+			auto move_pos = user.get_pos();
+			move_pos += Vec2(KeyD.pressed() - KeyA.pressed(), KeyS.pressed() - KeyW.pressed()).setLength(
+				user_move_speed);
+			if (move_pos.intersects(Scene::Rect())) // userをシーンの外に出さない
+			{
+				user.set_pos(move_pos);
+				user_collision.setCenter(user.get_pos().asPoint()); // 当たり判定の移動
+			}
+
+			// enemyの発生
+			if (enemies.size() == 0)
+			{
+				delete temp_wp;
+				delete temp_ai;
+				spawn_pos = RandomVec2(Scene::Rect());
+				temp_wp = new SampleWeapon(spawn_pos, Vec2(0, 5));
+				temp_ai = new EnemyAISample(temp_wp);
+				enemies.push_back(Enemy(temp_wp, temp_ai, Texture(U"").resized(200, 200), 1000, spawn_pos));
+			}
+			break;
+
+			//////////////////////////////////////////////////////////////////////////
+			// 第一ボスのロジック
+			///////////////////////////////////////////////////////////////////////////
+		case scene_stage_1_b:
+			// ポーズがあるか確認する
+			if(KeyEscape.pressed()){
+				game_state_carry.push(game_state);
+				game_state = scene_pause;
+			}
+
+			if (SimpleGUI::ButtonAt(U"タイトルへ", Scene::Center() + Vec2(0, 100), 250))
+			{
+				game_state = scene_title;
+			}
+			title(U"実装してねぇわ😎😎😎").drawAt(Scene::Center() - Vec2(0, 50));
+			break;
+
+		default:
+			break;
 		}
 
-		// ゲーム画面
+		////////////////////////////////////////////////////////////////////////////////////
+		/// 制御, 描画ロジック
+		////////////////////////////////////////////////////////////////////////////////////
 
-		// userの移動
-		Vec2 move_pos = user.get_pos();
-		move_pos += Vec2(KeyD.pressed() - KeyA.pressed(), KeyS.pressed() - KeyW.pressed()).setLength(user_move_speed);
-		if (move_pos.intersects(Scene::Rect())) // userをシーンの外に出さない
-		{
-			user.set_pos(move_pos);
-			user_collision.setCenter(user.get_pos().asPoint()); // 当たり判定の移動
-		}
-
-
-		// enemyの発生
-		if (enemies.size() == 0)
-		{
-			delete temp_wp;
-			delete temp_ai;
-			spawn_pos = RandomVec2(Scene::Rect());
-			temp_wp = new SampleWeapon(spawn_pos, Vec2(0, 5));
-			temp_ai = new EnemyAISample(temp_wp);
-			enemies.push_back(Enemy(temp_wp, temp_ai, Texture(U"").resized(200, 200), 1000, spawn_pos));
-		}
-		
 		// enemyの移動
-		for (int i = 0; i < enemies.size(); i++)
+		for (auto i = 0; i < enemies.size(); i++)
 		{
 			enemies[i].update();
 		}
-		
+
 		// 武器の移動、発射処理
 		user_wp->update(user.get_pos());
 
 		// 当たり判定の処理
 		// 自機の弾丸が敵に当たっているかどうか
-		for (int i = 0; i < user_wp->getBullets().size(); i++)
+		for (auto i = 0; i < user_wp->getBullets().size(); i++)
 		{
-			for (int j = 0; j < enemies.size(); j++)
+			for (auto j = 0; j < enemies.size(); j++)
 			{
 				if (user_wp->getBullets()[i].getCollision().intersects(enemies[j].get_collision()))
 				{
 					enemies[j].set_hp(enemies[j].get_hp() - user_wp->getBullets()[i].hit());
 				}
 
-				if(enemies[j].get_hp() <= 0)
+				if (enemies[j].get_hp() <= 0)
 				{
 					enemies.pop_front();
 				}
@@ -126,9 +265,9 @@ void Main()
 		}
 
 		// 敵の弾丸が自機に当たっているかどうか
-		for (int i = 0; i < enemies.size(); i++)
+		for (auto i = 0; i < enemies.size(); i++)
 		{
-			for (int j = 0; j < enemies[i].get_weapon()->getBullets().size(); j++)
+			for (auto j = 0; j < enemies[i].get_weapon()->getBullets().size(); j++)
 			{
 				if (enemies[i].get_weapon()->getBullets()[j].getCollision().intersects(user_collision))
 				{
@@ -137,9 +276,16 @@ void Main()
 			}
 		}
 
-		
+		// User の生存判定
+		if (user.get_hp() <= 0)
+		{
+			game_state = scene_game_over;
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////
 		// 描画処理
-		for (int i = 0; i < enemies.size(); i++)
+		////////////////////////////////////////////////////////////////////////////////////
+		for (auto i = 0; i < enemies.size(); i++)
 		{
 			enemies[i].draw();
 		}
