@@ -393,3 +393,5 @@ lib/
 
 # 追加分
 .vs/Tama/v16/Browse.VC.db
+
+.vs

@@ -30,7 +30,6 @@
 #include "Weapon.hpp"
 #include "ExtensionWeapons.hpp"
 
-
 void Main()
 {
 	// 初期化
@@ -60,6 +59,7 @@ void Main()
 	enemies.push_back(Enemy(temp_wp, temp_ai, Texture(U"").resized(200, 200), 1000, spawn_pos));
 
 	auto game_state = 0;
+	std::stack<int> game_state_carry;
 
 	while (System::Update())
 	{
@@ -132,6 +132,12 @@ void Main()
 
 			// ポーズ画面
 		case scene_pause:
+			if (SimpleGUI::ButtonAt(U"ゲームに戻る", Scene::Center() + Vec2(0, 100), 250))
+			{
+				game_state = game_state_carry.top();
+				game_state_carry.pop();
+			}
+			title(U"ポーズ").drawAt(Scene::Center() - Vec2(0, 50));
 			break;
 
 			// クリア画面
@@ -162,8 +168,28 @@ void Main()
 			title(U"リザルト").drawAt(Scene::Center() - Vec2(0, 50));
 			continue;
 
+			///////////////////////////////////////////////////////////////////////////////////
 			// 第一ステージのロジック
+			///////////////////////////////////////////////////////////////////////////////////
+			/*
+			タイマーで時間を測って, 1分経てばボスステージに遷移するのように
+			時間で制御するのはどうでしょうか.
+
+			メインループの上で初期化をしておいて, セレクト画面でセレクトされたときにタイマーをリセット.
+			ゲームステージのswitch文ないで時間計測によるif文で制御をかける感じでどうでしょうか
+
+			以下参考文献
+			https://github.com/Siv3D/Reference-JP/wiki/%E7%B5%8C%E9%81%8E%E6%99%82%E9%96%93%E3%81%AE%E6%B8%AC%E5%AE%9A
+
+			*/
 		case scene_stage_1:
+
+			// ポーズがあるか確認する
+			if(KeyEscape.pressed()){
+				game_state_carry.push(game_state);
+				game_state = scene_pause;
+			}
+
 			// userの移動
 			auto move_pos = user.get_pos();
 			move_pos += Vec2(KeyD.pressed() - KeyA.pressed(), KeyS.pressed() - KeyW.pressed()).setLength(
@@ -186,21 +212,29 @@ void Main()
 			}
 			break;
 
+			//////////////////////////////////////////////////////////////////////////
 			// 第一ボスのロジック
+			///////////////////////////////////////////////////////////////////////////
 		case scene_stage_1_b:
+			// ポーズがあるか確認する
+			if(KeyEscape.pressed()){
+				game_state_carry.push(game_state);
+				game_state = scene_pause;
+			}
+
 			if (SimpleGUI::ButtonAt(U"タイトルへ", Scene::Center() + Vec2(0, 100), 250))
 			{
 				game_state = scene_title;
 			}
 			title(U"実装してねぇわ😎😎😎").drawAt(Scene::Center() - Vec2(0, 50));
-			continue;
+			break;
 
 		default:
 			break;
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////
-		/// 
+		/// 制御, 描画ロジック
 		////////////////////////////////////////////////////////////////////////////////////
 
 		// enemyの移動
