@@ -311,9 +311,11 @@ void Main()
 					enemies[j].set_hp(enemies[j].get_hp() - user_wp->getBullets()[i].hit());
 				}
 
+				// 敵のHPが0いかだったら
 				if (enemies[j].get_hp() <= 0)
 				{
-					enemies.pop_front(); // ここでエネミーが死ぬ
+					enemies.remove_at(j); // エネミーが死ぬ
+					j--; // エネミーが消えた分インデックスの番号を１つ戻す
 				}
 			}
 		}
