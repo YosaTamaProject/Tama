@@ -52,6 +52,7 @@ void Main()
 	auto user_collision = Rect(Scene::Center(), user_size);
 
 	auto spawn_pos = RandomVec2(Scene::Rect());
+	Stopwatch stopwatch;
 	Array<Enemy> enemies;
 	WeaponBase* temp_wp = new SampleWeapon(spawn_pos, Vec2(0, 5));
 	EnemyAIBase* temp_ai = new EnemyAISample(temp_wp);
@@ -60,6 +61,10 @@ void Main()
 
 	auto game_state = 0;
 	std::stack<int> game_state_carry;
+
+	////////////
+	///init
+	stopwatch.start();
 
 	while (System::Update())
 	{
@@ -104,6 +109,7 @@ void Main()
 		{
 			// タイトル画面(エンター押して抜けるやつ)
 		case scene_title:
+
 			if (SimpleGUI::ButtonAt(U"ゲームスタート", Scene::Center() + Vec2(0, 100), 250))
 			{
 				game_state = scene_select;
@@ -117,11 +123,13 @@ void Main()
 			{
 				game_state = scene_stage_1;
 				user_wp = new PredatorCannon(Scene::Center());
+				stopwatch.restart();
 			}
 			if (SimpleGUI::ButtonAt(U"ステージ1ボスへ", Scene::Center() + Vec2(0, 50), 250))
 			{
 				game_state = scene_stage_1_b;
 				user_wp = new PlasmaRailGun(Scene::Center());
+				stopwatch.restart();
 			}
 			if (SimpleGUI::ButtonAt(U"アプリを終了する", Scene::Center() + Vec2(0, 150), 250))
 			{
@@ -132,13 +140,13 @@ void Main()
 
 			// ポーズ画面
 		case scene_pause:
-			if (SimpleGUI::ButtonAt(U"ゲームに戻る", Scene::Center() + Vec2(0, 100), 250))
+			if (SimpleGUI::ButtonAt(U"ゲームに戻る", Scene::Center() + Vec2(0, 100), 250) || KeyP.pressed())
 			{
 				game_state = game_state_carry.top();
 				game_state_carry.pop();
 			}
 			title(U"ポーズ").drawAt(Scene::Center() - Vec2(0, 50));
-			break;
+			continue;
 
 			// クリア画面
 		case scene_game_clear:
@@ -181,23 +189,36 @@ void Main()
 			以下参考文献
 			https://github.com/Siv3D/Reference-JP/wiki/%E7%B5%8C%E9%81%8E%E6%99%82%E9%96%93%E3%81%AE%E6%B8%AC%E5%AE%9A
 
+
+			とりあえず, ここのブロックではエネミーの発生のみを行う方針で...
+			
 			*/
 		case scene_stage_1:
 
 			// ポーズがあるか確認する
-			if(KeyEscape.pressed()){
+			// 上手くうごかねぇ....
+			if (KeyP.pressed())
+			{
 				game_state_carry.push(game_state);
 				game_state = scene_pause;
 			}
 
-			// userの移動
-			auto move_pos = user.get_pos();
-			move_pos += Vec2(KeyD.pressed() - KeyA.pressed(), KeyS.pressed() - KeyW.pressed()).setLength(
-				user_move_speed);
-			if (move_pos.intersects(Scene::Rect())) // userをシーンの外に出さない
+			// 60秒以内の敵出現と移動パターン
+			if (stopwatch.s() < 60)
 			{
-				user.set_pos(move_pos);
-				user_collision.setCenter(user.get_pos().asPoint()); // 当たり判定の移動
+				/* code */
+			}
+
+			// 120秒以内の敵出現と移動パターン
+			else if (stopwatch.s() < 120)
+			{
+				/* code */
+			}
+
+			// ボスへ分岐
+			else
+			{
+				game_state = scene_stage_1_b;
 			}
 
 			// enemyの発生
@@ -217,18 +238,17 @@ void Main()
 			///////////////////////////////////////////////////////////////////////////
 		case scene_stage_1_b:
 			// ポーズがあるか確認する
-			if(KeyEscape.pressed()){
+			if (KeyP.pressed())
+			{
 				game_state_carry.push(game_state);
 				game_state = scene_pause;
 			}
-
-			if (SimpleGUI::ButtonAt(U"タイトルへ", Scene::Center() + Vec2(0, 100), 250))
-			{
-				game_state = scene_title;
-			}
-			title(U"実装してねぇわ😎😎😎").drawAt(Scene::Center() - Vec2(0, 50));
 			break;
 
+			// 1体出現と体力が削りきれた時点でゲーム終了でどうでしょう?
+
+			/*code*/
+			
 		default:
 			break;
 		}
@@ -236,6 +256,16 @@ void Main()
 		////////////////////////////////////////////////////////////////////////////////////
 		/// 制御, 描画ロジック
 		////////////////////////////////////////////////////////////////////////////////////
+
+		// userの移動
+		auto move_pos = user.get_pos();
+		move_pos += Vec2(KeyD.pressed() - KeyA.pressed(), KeyS.pressed() - KeyW.pressed()).setLength(
+			user_move_speed);
+		if (move_pos.intersects(Scene::Rect())) // userをシーンの外に出さない
+		{
+			user.set_pos(move_pos);
+			user_collision.setCenter(user.get_pos().asPoint()); // 当たり判定の移動
+		}
 
 		// enemyの移動
 		for (auto i = 0; i < enemies.size(); i++)
