@@ -44,6 +44,8 @@ void Main()
 	constexpr auto user_move_speed = 10;
 	constexpr auto user_size = 50;
 
+	constexpr auto normal_enemy_limit = 5; // 雑魚的の数の上限
+
 	const auto title = Font(40);
 	const auto user_image = Texture(U"Path");
 
@@ -54,10 +56,8 @@ void Main()
 	auto spawn_pos = RandomVec2(Scene::Rect());
 	Stopwatch stopwatch;
 	Array<Enemy> enemies;
-	WeaponBase* temp_wp = new SampleWeapon(spawn_pos, Vec2(0, 5));
-	EnemyAIBase* temp_ai = new EnemyAISample(temp_wp);
-
-	enemies.push_back(Enemy(temp_wp, temp_ai, Texture(U"").resized(200, 200), 1000, spawn_pos));
+	Array<WeaponBase*> enemy_weapon;
+	Array<EnemyAIBase*> enemy_ai;
 
 	auto game_state = 0;
 	std::stack<int> game_state_carry;
@@ -140,7 +140,7 @@ void Main()
 
 			// ポーズ画面
 		case scene_pause:
-			if (SimpleGUI::ButtonAt(U"ゲームに戻る", Scene::Center() + Vec2(0, 100), 250) || KeyP.pressed())
+			if (SimpleGUI::ButtonAt(U"ゲームに戻る", Scene::Center() + Vec2(0, 100), 250) || KeyP.down())
 			{
 				game_state = game_state_carry.top();
 				game_state_carry.pop();
@@ -197,7 +197,7 @@ void Main()
 
 			// ポーズがあるか確認する
 			// 上手くうごかねぇ....
-			if (KeyP.pressed())
+			if (KeyP.down())
 			{
 				game_state_carry.push(game_state);
 				game_state = scene_pause;
@@ -206,31 +206,52 @@ void Main()
 			// 60秒以内の敵出現と移動パターン
 			if (stopwatch.s() < 60)
 			{
-				/* code */
+				// enemyの発生
+				if (enemies.size() < normal_enemy_limit && RandomBool(0.01))
+				{
+					spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
+					enemy_weapon.push_back(new SampleWeapon(spawn_pos, Vec2(0, 5))); // 武器を追加
+					enemy_ai.push_back(new EnemyAISample(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+
+					// 最後に追加したAIと武器を持った敵を生成
+					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(100, 100), 1000, spawn_pos));
+				}
 			}
 
 			// 120秒以内の敵出現と移動パターン
 			else if (stopwatch.s() < 120)
 			{
-				/* code */
+				// enemyの発生
+				if (enemies.size() < normal_enemy_limit) // 60秒以前より出現頻度がアップ
+				{
+					spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
+					enemy_weapon.push_back(new SampleWeapon(spawn_pos, Vec2(0, 5))); // 武器を追加
+					enemy_ai.push_back(new EnemyAISample(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+
+					// 最後に追加したAIと武器を持った敵を生成
+					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(100, 100), 1000, spawn_pos));
+				}
 			}
 
 			// ボスへ分岐
 			else
 			{
 				game_state = scene_stage_1_b;
+
+				// 雑魚敵の情報を全て削除
+				enemies.clear();
+				enemy_ai.clear();
+				enemy_weapon.clear();
+
+				// ボス敵の武器とAIの設定
+				spawn_pos = Vec2(Scene::Width() / 2, 0); // 画面の上端の中央から出現
+				enemy_weapon.push_back(new SampleWeapon(spawn_pos, Vec2(0, 30))); // 武器を追加
+				enemy_ai.push_back(new EnemyAISample(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+
+				// ボスのスポーン
+				enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(200, 200), 1000, spawn_pos));
 			}
 
-			// enemyの発生
-			if (enemies.size() == 0)
-			{
-				delete temp_wp;
-				delete temp_ai;
-				spawn_pos = RandomVec2(Scene::Rect());
-				temp_wp = new SampleWeapon(spawn_pos, Vec2(0, 5));
-				temp_ai = new EnemyAISample(temp_wp);
-				enemies.push_back(Enemy(temp_wp, temp_ai, Texture(U"").resized(200, 200), 1000, spawn_pos));
-			}
 			break;
 
 			//////////////////////////////////////////////////////////////////////////
@@ -238,16 +259,19 @@ void Main()
 			///////////////////////////////////////////////////////////////////////////
 		case scene_stage_1_b:
 			// ポーズがあるか確認する
-			if (KeyP.pressed())
+			if (KeyP.down())
 			{
 				game_state_carry.push(game_state);
 				game_state = scene_pause;
 			}
+			
+			// 1体出現と体力が削りきれた時点でゲーム終了でどうでしょう?<- 了解ですコンストラクタに渡す引数を変更するだけの状態にしておきます。
+			if (enemies.isEmpty()) // ボス敵がいなくなったら、Enemiesが空になる
+			{
+				game_state = scene_game_clear;
+			}
+
 			break;
-
-			// 1体出現と体力が削りきれた時点でゲーム終了でどうでしょう?
-
-			/*code*/
 			
 		default:
 			break;
@@ -287,9 +311,11 @@ void Main()
 					enemies[j].set_hp(enemies[j].get_hp() - user_wp->getBullets()[i].hit());
 				}
 
+				// 敵のHPが0いかだったら
 				if (enemies[j].get_hp() <= 0)
 				{
-					enemies.pop_front();
+					enemies.remove_at(j); // エネミーが死ぬ
+					j--; // エネミーが消えた分インデックスの番号を１つ戻す
 				}
 			}
 		}

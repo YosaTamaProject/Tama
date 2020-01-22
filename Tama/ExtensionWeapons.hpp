@@ -34,7 +34,7 @@ public:
 	{
 		pos_ = gun_pos;
 
-		if (KeyEnter.pressed())
+		if (KeySpace.pressed())
 		{
 			if (Scene::FrameCount() % (FPS / firing_rate_) == 0)
 			{
@@ -119,7 +119,7 @@ public:
 	{
 		pos_ = gun_pos;
 
-		if (KeyEnter.pressed())
+		if (KeySpace.pressed())
 		{
 			if (Scene::FrameCount() % (FPS / firing_rate_) == 0)
 			{
@@ -202,7 +202,7 @@ public:
 	{
 		pos_ = gun_pos;
 
-		if (KeyEnter.pressed())
+		if (KeySpace.pressed())
 		{
 			if (Scene::FrameCount() % (FPS / firing_rate_) == 0)
 			{
