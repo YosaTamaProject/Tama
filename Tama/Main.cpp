@@ -29,6 +29,8 @@
 #include "SampleEnemyAI1.hpp"
 #include "Weapon.hpp"
 #include "ExtensionWeapons.hpp"
+#include "EnemyAIExtension.hpp"
+#include "EnemyWeaponExtension.hpp"
 
 void Main()
 {
@@ -207,11 +209,31 @@ void Main()
 			if (stopwatch.s() < 60)
 			{
 				// enemyの発生
-				if (enemies.size() < normal_enemy_limit && RandomBool(0.01))
+				if (enemies.size() < normal_enemy_limit && RandomBool(0.2))
 				{
-					spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
-					enemy_weapon.push_back(new SampleWeapon(spawn_pos, Vec2(0, 5))); // 武器を追加
-					enemy_ai.push_back(new EnemyAISample(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+					switch(Random<int>(2, 2))
+					{
+					case 0: // 従来
+						spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
+						enemy_weapon.push_back(new SampleWeapon(spawn_pos, Vec2(0, 5))); // 武器を追加
+						enemy_ai.push_back(new EnemyAIDown(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+						break;
+						
+					case 1: // 新規
+						spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
+						enemy_weapon.push_back(new EnemyNormalGun(spawn_pos)); // 武器を追加
+						enemy_ai.push_back(new EnemyAIDown(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+						break;
+						
+					case 2: // 新規
+						spawn_pos = RandomVec2(Rect(1, 1, 800, 1)); // 画面の上端からランダムに座標を選択
+						enemy_weapon.push_back(new EnemyNormalGun(spawn_pos)); // 武器を追加
+						enemy_ai.push_back(new EnemyAIRandomPolygon(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+						break;
+
+					default:
+						break;
+					}
 
 					// 最後に追加したAIと武器を持った敵を生成
 					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(100, 100), 1000, spawn_pos));
@@ -224,12 +246,31 @@ void Main()
 				// enemyの発生
 				if (enemies.size() < normal_enemy_limit) // 60秒以前より出現頻度がアップ
 				{
-					spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
-					enemy_weapon.push_back(new SampleWeapon(spawn_pos, Vec2(0, 5))); // 武器を追加
-					enemy_ai.push_back(new EnemyAISample(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+					switch (Random<int>(1, 3))
+					{
+					case 1: // 新規
+						spawn_pos = RandomVec2(Rect(0, 0, 800, 1)); // 画面の上端からランダムに座標を選択
+						enemy_weapon.push_back(new EnemyNormalGun(spawn_pos)); // 武器を追加
+						enemy_ai.push_back(new EnemyAIDown(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+						break;
 
-					// 最後に追加したAIと武器を持った敵を生成
-					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(100, 100), 1000, spawn_pos));
+					case 2: // 新規
+						spawn_pos = RandomVec2(Rect(1, 1, 800, 1)); // 画面の上端からランダムに座標を選択
+						enemy_weapon.push_back(new EnemyNormalGun(spawn_pos)); // 武器を追加
+						enemy_ai.push_back(new EnemyAIRandomPolygon(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+						break;
+
+					case 3: // 新規
+						spawn_pos = RandomVec2(Rect(1, 1, 800, 1)); // 画面の上端からランダムに座標を選択
+						enemy_weapon.push_back(new EnemyShotGun(spawn_pos)); // 武器を追加
+						enemy_ai.push_back(new EnemyAIDown(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
+						break;
+
+					default:
+						break;
+					}
+
+					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(60, 60), 1000, spawn_pos));
 				}
 			}
 
@@ -329,6 +370,13 @@ void Main()
 				{
 					user.set_hp(user.get_hp() - enemies[i].get_weapon()->getBullets()[j].hit());
 				}
+			}
+
+			// 敵が領域外に出たら
+			if (!enemies[i].get_pos().intersects(Scene::Rect()))
+			{
+				enemies.remove_at(i); // エネミーが死ぬ
+				i--; // エネミーが消えた分インデックスの番号を１つ戻す
 			}
 		}
 

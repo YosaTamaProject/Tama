@@ -385,7 +385,13 @@
     <ClInclude Include="EnemyAI.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ExtensionAI.hpp">
+    <ClInclude Include="SampleEnemyAI1.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyAIExtension.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyWeaponExtension.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
