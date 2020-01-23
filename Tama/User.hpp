@@ -26,11 +26,13 @@ public:
 	void draw() const override final
 	{
 		// ‰¼À‘•‚Å‚²‚´‚¢‚Ü‚·
+		ClearPrint();
 		Print(this->get_hp());
 		Print(this->get_weapon());
 		Print(this->get_x());
 		Print(this->get_y());
 		Print(this->get_item());
+		
 	}
 
 	///////////////////////
