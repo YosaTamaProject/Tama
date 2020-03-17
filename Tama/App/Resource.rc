@@ -58,6 +58,21 @@ Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 //////////////////////////////////////////////////////
 
 
+Resource(texture/denkikairo.png)
+Resource(texture/flieger.png)
+Resource(texture/kokugo.png)
+Resource(texture/player.png)
+Resource(texture/predator.png)
+Resource(texture/railgun.png)
+Resource(music/GameOverBGM.wav)
+Resource(music/GBGM-1.wav)
+Resource(music/GBGM-2.wav)
+Resource(music/GBGM-3.wav)
+Resource(music/GBGM-4.wav)
+Resource(music/Gbgm-boss.wav)
+Resource(music/Gbgm-boss_2.wav)
+Resource(music/My_Song_10.wav)
+
 
 /* 
 	//
