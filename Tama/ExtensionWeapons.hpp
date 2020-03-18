@@ -21,8 +21,8 @@ public:
 
 	PredatorCannon(Vec2 pos) : WeaponBase()
 	{
-		gun_image_ = Texture(U"path");
-		bullet_image_ = Texture(U"path");
+		gun_image_ = Texture(U"texture/predator.png");
+		bullet_image_ = Texture(U"texture/enemy.png");
 		firing_rate_ = 20; // Œˆ‚ß‘Å‚¿
 		damage_ = 40;
 		pos_ = pos;
@@ -106,8 +106,8 @@ public:
 
 	PlasmaRailGun(Vec2 pos) : WeaponBase()
 	{
-		gun_image_ = Texture(U"path");
-		bullet_image_ = Texture(U"path");
+		gun_image_ = Texture(U"texture/railgun.png");
+		bullet_image_ = Texture();
 		firing_rate_ =3; // Œˆ‚ß‘Å‚¿
 		damage_ = 100;
 		pos_ = pos;
@@ -189,8 +189,8 @@ public:
 
 	Fliegerhummer(Vec2 pos) : WeaponBase()
 	{
-		gun_image_ = Texture(U"path");
-		bullet_image_ = Texture(U"path");
+		gun_image_ = Texture(U"texture/flieger.png");
+		bullet_image_ = Texture(U"texture/sinnda.png");
 		firing_rate_ = 10; // Œˆ‚ß‘Å‚¿
 		damage_ = 1;
 		pos_ = pos;
