@@ -50,7 +50,7 @@ void Main()
 	constexpr auto normal_enemy_limit = 5; // 雑魚的の数の上限
 
 	const auto title = Font(40);
-	const auto user_image = Texture(U"texture/player.png");
+	const auto user_image = Texture(Resource(U"texture/player.png"));
 
 	WeaponBase* user_wp = new PredatorCannon(Scene::Center());
 	auto user = User(user_wp, 100, Scene::Center(), 0);
@@ -66,12 +66,12 @@ void Main()
 	std::stack<int> game_state_carry;
 
 	// Texure関連
-	const Texture kokugo_enemy = Texture(U"texture/kokugo.png");
-	const Texture denkikairo_enemy = Texture(U"texture/denkikairo.png");
+	const Texture kokugo_enemy = Texture(Resource(U"texture/kokugo.png"));
+	const Texture denkikairo_enemy = Texture(Resource(U"texture/denkikairo.png"));
 
 	Audio bgm_normal;
 	Audio bgm_boss;
-	const Audio gameover(U"music/GameOverBGM.wav");
+	const Audio gameover(Resource(U"music/GameOverBGM.mp3"));
 	
 
 	
@@ -97,23 +97,23 @@ void Main()
 		break;
 	}
 
-	bgm_boss = RandomBool() ? Audio(Resource(U"music/Gbgm-boss.wav")) : Audio(Resource(U"music/Gbgm-boss_2.wav"));
+	bgm_boss = RandomBool() ? Audio(Resource(U"music/Gbgm-boss.mp3")) : Audio(Resource(U"music/Gbgm-boss_2.mp3"));
 	switch(Random<int>(0, 3))
 	{
 	case 0:
-		bgm_normal = Audio(Resource(U"music/GBGM-1.wav"));
+		bgm_normal = Audio(Resource(U"music/GBGM-1.mp3"));
 		break;
 	case 1:
-		bgm_normal = Audio(Resource(U"music/GBGM-2.wav"));
+		bgm_normal = Audio(Resource(U"music/GBGM-2.mp3"));
 		break;
 	case 2:
-		bgm_normal = Audio(Resource(U"music/GBGM-3.wav"));
+		bgm_normal = Audio(Resource(U"music/GBGM-3.mp3"));
 		break;
 	case 3:
-		bgm_normal = Audio(Resource(U"music/GBGM-4.wav"));
+		bgm_normal = Audio(Resource(U"music/GBGM-4.mp3"));
 		break;
 	default:
-		bgm_normal = Audio(Resource(U"music/My_Song_10.wav"));
+		bgm_normal = Audio(Resource(U"music/My_Song_10.mp3"));
 		break;
 	}
 	bgm_boss.setLoop(true);
