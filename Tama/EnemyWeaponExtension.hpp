@@ -1,5 +1,4 @@
 ﻿#pragma once
-
 // インクルードガード
 #ifndef ENEMY_WEAPON_EXTENSION_HPP
 #define ENEMY_WEAPON_EXTENSION_HPP
@@ -19,7 +18,7 @@ public:
 
 	EnemyNormalGun(Vec2 pos) : WeaponBase()
 	{
-		bullet_image_ = Texture(U"Path");
+		bullet_image_ = Texture(Resource(U"texture/enemy_bullet.png"));
 		firing_rate_ = 2; // 決め打ち
 		damage_ = 5;
 		pos_ = pos;
@@ -95,7 +94,7 @@ public:
 
 	EnemyShotGun(Vec2 pos) : WeaponBase()
 	{
-		bullet_image_ = Texture();
+		bullet_image_ = Texture(Resource(U"texture/enemy_bullet.png"));
 		firing_rate_ = 1; // 決め打ち
 		damage_ = 3;
 		pos_ = pos;
@@ -176,7 +175,7 @@ public:
 
 	BossWeapon(Vec2 pos) : WeaponBase()
 	{
-		bullet_image_ = Texture();
+		bullet_image_ = Texture(Resource(U"texture/enemy_bullet.png"));
 		firing_rate_ = 10; // 決め打ち
 		damage_ = 2;
 		pos_ = pos;

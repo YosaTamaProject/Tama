@@ -7,7 +7,7 @@
 // Siv3D Engine Resources (DO NOT REMOVE)
 //
 //////////////////////////////////////////////////////
-DefineResource(100, ICON, Icon.ico)
+DefineResource(100, ICON, icon.ico)
 Resource(engine/shader/sprite.vs)
 Resource(engine/shader/shape.ps)
 Resource(engine/shader/texture.ps)
@@ -57,6 +57,24 @@ Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 //
 //////////////////////////////////////////////////////
 
+
+Resource(texture/denkikairo.png)
+Resource(texture/flieger.png)
+Resource(texture/kokugo.png)
+Resource(texture/player.png)
+Resource(texture/predator.png)
+Resource(texture/railgun.png)
+Resource(texture/bullet.png)
+Resource(texture/sinnda.png)
+Resource(texture/enemy_bullet.png)
+Resource(music/GameOverBGM.mp3)
+Resource(music/GBGM-1.mp3)
+Resource(music/GBGM-2.mp3)
+Resource(music/GBGM-3.mp3)
+Resource(music/GBGM-4.mp3)
+Resource(music/Gbgm-boss.mp3)
+Resource(music/Gbgm-boss_2.mp3)
+Resource(music/My_Song_10.mp3)
 
 
 /* 

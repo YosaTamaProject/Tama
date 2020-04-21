@@ -45,11 +45,12 @@ void Main()
 	constexpr auto scene_stage_1_b = 7;
 	constexpr auto user_move_speed = 10;
 	constexpr auto user_size = 50;
+	
 
 	constexpr auto normal_enemy_limit = 5; // 雑魚的の数の上限
 
 	const auto title = Font(40);
-	const auto user_image = Texture(U"Path");
+	const auto user_image = Texture(Resource(U"texture/player.png"));
 
 	WeaponBase* user_wp = new PredatorCannon(Scene::Center());
 	auto user = User(user_wp, 100, Scene::Center(), 0);
@@ -64,9 +65,60 @@ void Main()
 	auto game_state = 0;
 	std::stack<int> game_state_carry;
 
+	// Texure関連
+	const Texture kokugo_enemy = Texture(Resource(U"texture/kokugo.png"));
+	const Texture denkikairo_enemy = Texture(Resource(U"texture/denkikairo.png"));
+
+	Audio bgm_normal;
+	Audio bgm_boss;
+	const Audio gameover(Resource(U"music/GameOverBGM.mp3"));
+	
+
+	
+
 	////////////
 	///init
 	stopwatch.start();
+
+	WeaponBase* user_weapon;
+	switch(Random<int>(0, 2))
+	{
+	case 0:
+		user_weapon = new PredatorCannon(Scene::Center());
+		break;
+	case 1:
+		user_weapon = new PlasmaRailGun(Scene::Center());
+		break;
+	case 2:
+		user_weapon = new Fliegerhummer(Scene::Center());
+		break;
+	default:
+		user_weapon = new PredatorCannon(Scene::Center());
+		break;
+	}
+
+	bgm_boss = RandomBool() ? Audio(Resource(U"music/Gbgm-boss.mp3")) : Audio(Resource(U"music/Gbgm-boss_2.mp3"));
+	switch(Random<int>(0, 3))
+	{
+	case 0:
+		bgm_normal = Audio(Resource(U"music/GBGM-1.mp3"));
+		break;
+	case 1:
+		bgm_normal = Audio(Resource(U"music/GBGM-2.mp3"));
+		break;
+	case 2:
+		bgm_normal = Audio(Resource(U"music/GBGM-3.mp3"));
+		break;
+	case 3:
+		bgm_normal = Audio(Resource(U"music/GBGM-4.mp3"));
+		break;
+	default:
+		bgm_normal = Audio(Resource(U"music/My_Song_10.mp3"));
+		break;
+	}
+	bgm_boss.setLoop(true);
+	bgm_normal.setLoop(true);
+
 
 	while (System::Update())
 	{
@@ -124,14 +176,16 @@ void Main()
 			if (SimpleGUI::ButtonAt(U"ステージ1へ", Scene::Center(), 250))
 			{
 				game_state = scene_stage_1;
-				user_wp = new PredatorCannon(Scene::Center());
+				user_wp = user_weapon;
 				stopwatch.restart();
+				bgm_normal.play();
 			}
 			if (SimpleGUI::ButtonAt(U"ステージ1ボスへ", Scene::Center() + Vec2(0, 50), 250))
 			{
 				game_state = scene_stage_1_b;
-				user_wp = new PlasmaRailGun(Scene::Center());
+				user_wp = user_weapon;
 				stopwatch.restart();
+				bgm_boss.play();
 			}
 			if (SimpleGUI::ButtonAt(U"アプリを終了する", Scene::Center() + Vec2(0, 150), 250))
 			{
@@ -162,9 +216,11 @@ void Main()
 
 			// ゲームオーバー画面
 		case scene_game_over:
+			gameover.play();
 			if (SimpleGUI::ButtonAt(U"結果を確認する", Scene::Center() + Vec2(0, 100), 250))
 			{
 				game_state = scene_result;
+				gameover.stop();
 			}
 			title(U"ゲームオーバー").drawAt(Scene::Center() - Vec2(0, 50));
 			continue;
@@ -236,7 +292,7 @@ void Main()
 					}
 
 					// 最後に追加したAIと武器を持った敵を生成
-					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(100, 100), 1000, spawn_pos));
+					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], kokugo_enemy.resized(100, 100), 1000, spawn_pos));
 				}
 			}
 
@@ -270,7 +326,7 @@ void Main()
 						break;
 					}
 
-					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(60, 60), 1000, spawn_pos));
+					enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], kokugo_enemy.resized(60, 60), 1000, spawn_pos));
 				}
 			}
 
@@ -278,6 +334,8 @@ void Main()
 			else
 			{
 				game_state = scene_stage_1_b;
+				bgm_normal.stop();
+				bgm_boss.play();
 
 				// 雑魚敵の情報を全て削除
 				enemies.clear();
@@ -290,7 +348,7 @@ void Main()
 				enemy_ai.push_back(new EnemyAISample(enemy_weapon[enemy_weapon.size() - 1])); // 前の行で追加した武器を選択して、AIを追加
 
 				// ボスのスポーン
-				enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], Texture(U"").resized(200, 200), 1000, spawn_pos));
+				enemies.push_back(Enemy(enemy_weapon[enemy_weapon.size() - 1], enemy_ai[enemy_ai.size() - 1], denkikairo_enemy.resized(200, 200), 1000, spawn_pos));
 			}
 
 			break;
@@ -310,6 +368,7 @@ void Main()
 			if (enemies.isEmpty()) // ボス敵がいなくなったら、Enemiesが空になる
 			{
 				game_state = scene_game_clear;
+				bgm_boss.stop();
 			}
 
 			break;
@@ -384,6 +443,8 @@ void Main()
 		if (user.get_hp() <= 0)
 		{
 			game_state = scene_game_over;
+			bgm_normal.stop();
+			bgm_boss.stop();
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////
